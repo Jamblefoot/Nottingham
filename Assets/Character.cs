@@ -6,6 +6,7 @@ public class Character : MonoBehaviour
 {
     List<Tile> moves = new List<Tile>();
 
+
     int moveSpeed = 3;
 
     [SerializeField] GameObject tilePrefab;
@@ -28,7 +29,7 @@ public class Character : MonoBehaviour
     {                       //THIS IS TEMPORARY, POOL THIS SHIT
         for(int i = moves.Count - 1; i >= 0; i--)
         {
-            Destroy(moves[i]);
+            Destroy(moves[i].gameObject);
         }
         moves.Clear();
     }
@@ -122,4 +123,49 @@ public class Character : MonoBehaviour
             Gizmos.DrawSphere(moves[i].transform.position, 0.2f);
         }
     }
+
+    public bool IsThisMove(Vector3 pos)
+    {
+        int x = Mathf.RoundToInt(pos.x);
+        int y = Mathf.RoundToInt(pos.y);
+        int z = Mathf.RoundToInt(pos.z);
+
+        for(int i = 0; i < moves.Count; i++)
+        {
+            if(Mathf.RoundToInt(moves[i].tran.position.x) == x)
+            {
+                if(Mathf.RoundToInt(moves[i].tran.position.z) == z)
+                {
+                    //SHOULD ADD Y POSITION STUFF, TOO
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public void Move(Vector3 pos)
+    {
+        int x = Mathf.RoundToInt(pos.x);
+        int y = Mathf.RoundToInt(pos.y);
+        int z = Mathf.RoundToInt(pos.z);
+
+        for (int i = 0; i < moves.Count; i++)
+        {
+            if (Mathf.RoundToInt(moves[i].tran.position.x) == x)
+            {
+                if (Mathf.RoundToInt(moves[i].tran.position.z) == z)
+                {
+                    //SHOULD ADD Y POSITION STUFF, TOO
+                    transform.position = new Vector3(x, pos.y, z);
+                    FindMoves();
+                    if(GameControl.instance.currentCharacter == this)
+                        GameControl.instance.followCam.FocusOnCurrentCharacter();
+                }
+            }
+        }
+    }
+
+
 }

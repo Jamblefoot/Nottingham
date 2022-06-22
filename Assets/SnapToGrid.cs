@@ -59,8 +59,22 @@ public class SnapToGrid : MonoBehaviour
 
                 targetPos.x = Mathf.RoundToInt(targetPos.x);
                 targetPos.z = Mathf.RoundToInt(targetPos.z);
-                
-                transform.position = targetPos;
+
+                if (GameControl.instance.currentCharacter != null)
+                {
+                    if (GameControl.instance.currentCharacter.IsThisMove(targetPos))
+                    {
+                        transform.position = targetPos;
+
+                        if(Input.GetButtonDown("Fire1"))
+                        {
+                            GameControl.instance.currentCharacter.Move(targetPos);
+                        }
+                    }
+
+                    
+                }
+                else transform.position = targetPos;
             }
             
         }
@@ -97,6 +111,8 @@ public class SnapToGrid : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 1000f, groundLayers, QueryTriggerInteraction.Ignore))
             {
+                
+
                 if (!blockLayers.Contains(hit.collider.gameObject.layer))
                     targetPos = hit.point;
             }

@@ -7,6 +7,8 @@ public class GameControl : MonoBehaviour
     public static GameControl instance;
 
     public Character currentCharacter;
+
+    public CameraControl followCam;
     
     // Start is called before the first frame update
     void Start()
