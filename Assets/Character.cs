@@ -4,26 +4,70 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-    List<Tile> moves = new List<Tile>();
+    List<Tile> moves = new List<Tile>(); //RENAME THIS TO NODES OR SOMETHING
+    
+    Vector3[][] movePoints;
+
+    List<Vector3> moveList = new List<Vector3>();
 
 
     int moveSpeed = 3;
+    /*public */float moveAnimationSpeed = 10f;
+    bool moving;
 
     [SerializeField] GameObject tilePrefab;
 
     [SerializeField] LayerMask groundLayer;
     [SerializeField] LayerMask obstacleLayer;
+
+    public bool controllable;
+
+    public bool alive = true;
+
     // Start is called before the first frame update
     void Start()
     {
-        FindMoves();
+        Invoke("Initialize", 0.5f);
+        //FindMoves();
     }
 
-    // Update is called once per frame
+    void Initialize()
+    {
+        FindPosition();
+        SetupArrays();
+        FindMoves();
+        EnableNodes(false);
+    }
+
+    void SetupArrays()
+    {
+        movePoints = new Vector3[moveSpeed * 2 + 1][];
+        for(int i = 0; i < movePoints.Length; i++)
+        {
+            movePoints[i] = new Vector3[moveSpeed * 2 + 1];
+        }
+    }
+
+    void FindPosition()
+    {
+        Vector3 pos = transform.position;
+        pos.x = Mathf.RoundToInt(pos.x);
+        pos.z = Mathf.RoundToInt(pos.z);
+        pos.y = GetGroundHeightAtPosition(pos);
+
+        transform.position = pos;
+    }
+
+    void MoveToNearestNode(Vector3 pos)
+    {
+
+    }
+
+    /*// Update is called once per frame
     void Update()
     {
         
-    }
+    }*/
 
     void ClearMoves()
     {                       //THIS IS TEMPORARY, POOL THIS SHIT
@@ -45,7 +89,7 @@ public class Character : MonoBehaviour
         {
             for(int z = -moveSpeed; z <= moveSpeed; z++)
             {
-                GameObject move = GetGroundAtPosition(transform.position + Vector3.right * x + Vector3.forward * z);
+                GameObject move = SetTileAtPosition(transform.position + Vector3.right * x + Vector3.forward * z);
                 if(move != null)
                     moves.Add(move.GetComponent<Tile>());
             }
@@ -87,7 +131,26 @@ public class Character : MonoBehaviour
         return null;
     }
 
-    GameObject GetGroundAtPosition(Vector3 pos)
+    float GetGroundHeightAtPosition(Vector3 pos)
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(pos + Vector3.up * 10, Vector3.down, out hit, 20f, groundLayer, QueryTriggerInteraction.Ignore))
+        {
+            Vector3 groundPos = hit.point;
+
+            return groundPos.y;
+
+            /*if (Physics.Raycast(groundPos + Vector3.up * 10, Vector3.down, out hit, 9.5f, obstacleLayer, QueryTriggerInteraction.Ignore))
+            {
+                return null;
+            }*/
+        }
+
+        return transform.position.y;
+        
+    }
+
+    GameObject SetTileAtPosition(Vector3 pos)
     {
         RaycastHit hit;
         if(Physics.Raycast(pos + Vector3.up * 10, Vector3.down, out hit, 20f, groundLayer, QueryTriggerInteraction.Ignore))
@@ -147,6 +210,7 @@ public class Character : MonoBehaviour
 
     public void Move(Vector3 pos)
     {
+
         int x = Mathf.RoundToInt(pos.x);
         int y = Mathf.RoundToInt(pos.y);
         int z = Mathf.RoundToInt(pos.z);
@@ -158,12 +222,47 @@ public class Character : MonoBehaviour
                 if (Mathf.RoundToInt(moves[i].tran.position.z) == z)
                 {
                     //SHOULD ADD Y POSITION STUFF, TOO
-                    transform.position = new Vector3(x, pos.y, z);
-                    FindMoves();
-                    if(GameControl.instance.currentCharacter == this)
-                        GameControl.instance.followCam.FocusOnCurrentCharacter();
+                    //transform.position = new Vector3(x, pos.y, z);
+                    moveList.Add(new Vector3(x, pos.y, z));
+                    if (!moving)
+                        StartCoroutine(MoveCo(moveSpeed));
+                    //FindMoves();
+                    //if(GameControl.instance.currentCharacter == this)
+                        //GameControl.instance.followCam.FocusOnCurrentCharacter();
                 }
             }
+        }
+    }
+
+    IEnumerator MoveCo(float speed)
+    {
+        moving = true;
+        EnableNodes(false);
+        while(moveList.Count > 0)//Vector3.Distance(transform.position, pos) > 0.05f)
+        {
+            transform.position = Vector3.Lerp(transform.position, moveList[0], (speed * Time.deltaTime) / Vector3.Distance(transform.position, moveList[0]));
+            if((transform.position - moveList[0]).sqrMagnitude < 0.09f)
+                moveList.RemoveAt(0);
+
+            if (GameControl.instance.currentCharacter == this)
+                GameControl.instance.followCam.FocusOnCurrentCharacter();
+            yield return null;
+        }
+
+        moving = false;
+        FindMoves();
+        if(GameControl.instance.currentCharacter == this)
+        {
+            GameControl.instance.followCam.FocusOnCurrentCharacter();
+            EnableNodes(true);
+        }
+    }
+
+    public void EnableNodes(bool setting)
+    {
+        for(int i = 0; i < moves.Count; i++)
+        {
+            moves[i].gameObject.SetActive(setting);
         }
     }
 

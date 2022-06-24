@@ -54,7 +54,7 @@ Shader "Stufco/MeterGridSurface"
             c -= abs(dot(IN.worldNormal, float3(0,1,0))) >= 0.99 ? 0 : (IN.worldPos.y - floor(IN.worldPos.y)) > _LineThicknessY ? 0 : 1;//abs(dot(IN.worldNormal, float3(0,1,0))) < 0.9 ? 0 : 1;
             c -= abs(dot(IN.worldNormal, float3(0,0,1))) >= 0.99 ? 0 : (IN.worldPos.z + offset - floor(IN.worldPos.z + offset)) > _LineThickness ? 0 : 1;//abs(dot(IN.worldNormal, float3(0,0,1))) < 0.9 ? 0 : 1;
             c.rgb = c.r < 0.5 ? _LineColor : _Color;
-            c.a = c.r < 0.5 ? 1 : 0;
+            c.a = c.r < 0.5 ? _LineColor.a : 0;
             //TEXTURE STUFF NOT CURRENTLY WORKING!!!!!!
             fixed4 tex = abs(dot(IN.worldNormal, float3(1,0,0))) > 0.01 ? tex2D(_MainTex, IN.worldPos.xy) : 
                             abs(dot(IN.worldNormal, float3(0,1,0))) > 0.01 ? tex2D(_MainTex, IN.worldPos.xz) :

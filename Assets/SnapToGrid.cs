@@ -13,6 +13,8 @@ public class SnapToGrid : MonoBehaviour
     public LayerMask groundLayers;
     public List<int> blockLayers = new List<int>();
 
+    MeshRenderer rend;
+
 
     private void OnDrawGizmos() 
     {
@@ -27,18 +29,18 @@ public class SnapToGrid : MonoBehaviour
     }
 
 
-    /*// Start is called before the first frame update
+    // Start is called before the first frame update
     void Start()
     {
         if(Application.IsPlaying(gameObject))
         {
-            // Play logic
+            rend = GetComponentInChildren<MeshRenderer>();
         }
         else
         {
             // Editor logic
         }
-    }*/
+    }
 
     // Update is called once per frame
     void Update()
@@ -46,6 +48,13 @@ public class SnapToGrid : MonoBehaviour
         if (Application.IsPlaying(gameObject))
         {
             // Play Mode logic
+            if(GameControl.instance.currentCharacter == null)
+            {
+                rend.enabled = false;
+            }
+            else rend.enabled = true;
+
+
             if(!locked)
             {
                 //Vector3 screenPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -53,7 +62,7 @@ public class SnapToGrid : MonoBehaviour
                 RaycastHit hit;
                 if(Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, groundLayers, QueryTriggerInteraction.Ignore))
                 {
-                    if(!blockLayers.Contains(hit.collider.gameObject.layer))
+                    //if(!blockLayers.Contains(hit.collider.gameObject.layer))
                         targetPos = hit.point;
                 }
 
@@ -66,7 +75,7 @@ public class SnapToGrid : MonoBehaviour
                     {
                         transform.position = targetPos;
 
-                        if(Input.GetButtonDown("Fire1"))
+                        if(Input.GetButtonDown("Fire2"))
                         {
                             GameControl.instance.currentCharacter.Move(targetPos);
                         }

@@ -16,7 +16,7 @@ public class CameraControl : MonoBehaviour
     float maxOrthoSize = 20;
 
     Vector3 orthoPosition;
-    Vector3 perspectivePosition = Vector3.up * 2f;
+    [SerializeField] Vector3 perspectivePosition = Vector3.up * 2f;
 
     Quaternion orthoCamRot;
     float orthoHouseRot = -45;
@@ -44,6 +44,10 @@ public class CameraControl : MonoBehaviour
         //housing.rotation = housing.rotation * Quaternion.Euler(0, -horizontal, 0);
 
         cam.orthographicSize -= scroll;
+        if(scroll > 0f)
+        {
+            FocusOnCurrentCharacter(scroll / cam.orthographicSize);
+        }
         cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minOrthoSize, maxOrthoSize);
         if(cam.orthographicSize < minOrthoSize + 0.1f)
         {
@@ -58,6 +62,8 @@ public class CameraControl : MonoBehaviour
                 {
                     housing.position = GameControl.instance.currentCharacter.transform.position;
                 }
+
+                Cursor.lockState = CursorLockMode.Locked;
             }
         }
         else 
@@ -73,6 +79,8 @@ public class CameraControl : MonoBehaviour
                 {
                     housing.position = GameControl.instance.currentCharacter.transform.position;
                 }
+
+                Cursor.lockState = CursorLockMode.None;
             }
         }
 
@@ -92,6 +100,16 @@ public class CameraControl : MonoBehaviour
                 orthoHouseRot = rotTarget.eulerAngles.y - 90;
             }
 
+            //CHECK MOUSE AT EDGE OF SCREEN TO PAN
+            if (Input.mousePosition.x <= 0)
+                horizontal = -1;
+            else if(Input.mousePosition.x >= Screen.width)
+                horizontal = 1;
+            if(Input.mousePosition.y <= 0)
+                vertical = -1;
+            else if(Input.mousePosition.y >= Screen.height)
+                vertical = 1;
+
             if(Mathf.Abs(horizontal) > 0.1f)
             {
                 housing.position += Time.deltaTime * housing.right * horizontal * moveSpeed;
@@ -100,6 +118,8 @@ public class CameraControl : MonoBehaviour
             {
                 housing.position += Time.deltaTime * housing.forward * vertical * moveSpeed;
             }
+
+            
 
             //cam.orthographicSize -= scroll;
             //cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minOrthoSize, maxOrthoSize);
@@ -124,10 +144,10 @@ public class CameraControl : MonoBehaviour
         housing.rotation = Quaternion.Slerp(housing.rotation, rotTarget, (Time.deltaTime * 100f) / Quaternion.Angle(housing.rotation, rotTarget));
     }
 
-    public void FocusOnCurrentCharacter()
+    public void FocusOnCurrentCharacter(float weight = 1f)
     {
         if(GameControl.instance.currentCharacter == null) return;
 
-        housing.transform.position = GameControl.instance.currentCharacter.transform.position;
+        housing.transform.position = Vector3.Lerp(housing.transform.position, GameControl.instance.currentCharacter.transform.position, weight);
     }
 }
