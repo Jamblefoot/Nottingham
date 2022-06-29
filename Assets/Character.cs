@@ -244,7 +244,7 @@ public class Character : MonoBehaviour
             if((transform.position - moveList[0]).sqrMagnitude < 0.09f)
                 moveList.RemoveAt(0);
 
-            if (GameControl.instance.currentCharacter == this)
+            if (GameControl.instance.currentCharacter == this && GameControl.instance.followCam.cam.orthographicSize < 5f)
                 GameControl.instance.followCam.FocusOnCurrentCharacter();
             yield return null;
         }
@@ -253,9 +253,10 @@ public class Character : MonoBehaviour
         FindMoves();
         if(GameControl.instance.currentCharacter == this)
         {
-            GameControl.instance.followCam.FocusOnCurrentCharacter();
+            //GameControl.instance.followCam.FocusOnCurrentCharacter();
             EnableNodes(true);
         }
+        else EnableNodes(false);
     }
 
     public void EnableNodes(bool setting)

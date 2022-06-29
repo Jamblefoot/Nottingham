@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraControl : MonoBehaviour
 {
-    Camera cam;
+    public Camera cam;
     Transform housing;
 
     Quaternion rotTarget;
@@ -73,7 +73,9 @@ public class CameraControl : MonoBehaviour
                 cam.orthographic = true;
                 cam.transform.localPosition = orthoPosition;
                 cam.transform.localRotation = orthoCamRot;
+                
                 rotTarget = Quaternion.Euler(0, orthoHouseRot, 0);
+                housing.rotation = rotTarget;
 
                 if(GameControl.instance.currentCharacter != null)
                 {
@@ -89,15 +91,17 @@ public class CameraControl : MonoBehaviour
         {
             if(Input.GetKeyDown(KeyCode.Q))
             {
+                Rotate(1);
                 //housing.rotation = housing.rotation * Quaternion.Euler(0, 90, 0);
-                rotTarget = rotTarget * Quaternion.Euler(0, 90, 0);
-                orthoHouseRot = rotTarget.eulerAngles.y + 90;
+                /*rotTarget = rotTarget * Quaternion.Euler(0, 90, 0);
+                orthoHouseRot = rotTarget.eulerAngles.y + 90;*/
             }
             else if(Input.GetKeyDown(KeyCode.E))
             {
+                Rotate(-1);
                 //housing.rotation = housing.rotation * Quaternion.Euler(0, 90, 0);
-                rotTarget = rotTarget * Quaternion.Euler(0, -90, 0);
-                orthoHouseRot = rotTarget.eulerAngles.y - 90;
+                /*rotTarget = rotTarget * Quaternion.Euler(0, -90, 0);
+                orthoHouseRot = rotTarget.eulerAngles.y - 90;*/
             }
 
             //CHECK MOUSE AT EDGE OF SCREEN TO PAN
@@ -125,7 +129,7 @@ public class CameraControl : MonoBehaviour
             //cam.orthographicSize = Mathf.Clamp(cam.orthographicSize, minOrthoSize, maxOrthoSize);
             //if(cam.orthographicSize < minOrthoSize)
 
-            if(Input.GetButtonDown("Jump"))
+            if(Input.GetButton("Jump"))
                 FocusOnCurrentCharacter();
         }
         else //!cam.orthographic
@@ -149,5 +153,11 @@ public class CameraControl : MonoBehaviour
         if(GameControl.instance.currentCharacter == null) return;
 
         housing.transform.position = Vector3.Lerp(housing.transform.position, GameControl.instance.currentCharacter.transform.position, weight);
+    }
+
+    public void Rotate(int direction)
+    {
+        rotTarget = rotTarget * Quaternion.Euler(0, direction * 90, 0);
+        orthoHouseRot = rotTarget.eulerAngles.y;// + direction * 90;
     }
 }
